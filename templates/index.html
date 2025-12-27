@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Plant Disease Detector</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <style>
+        /* small responsive tweaks if style.css not loaded */
+        @media (max-width: 600px) {
+            img { max-width: 100%; }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Plant Disease Detector</h1>
+        <form method="post" enctype="multipart/form-data">
+            <input type="file" name="file" accept=".png,.jpg,.jpeg">
+            <input type="submit" value="Upload and Predict">
+        </form>
+        
+        {% if message %}
+            <p class="message">{{ message }}</p>
+        {% endif %}
+
+        {% if image_path %}
+            <div class="result">
+                <div class="image-wrap">
+                    <img src="{{ url_for('static', filename=image_path.split('/')[-1]) }}" alt="Uploaded Image">
+                </div>
+                <div class="prediction">
+                    <h2>Prediction</h2>
+                    <p class="pred-label">{{ predicted_label }}</p>
+                    <p class="pred-confidence">Confidence: {{ confidence }}%</p>
+                </div>
+            </div>
+
+            <!-- Disease information box -->
+            <div class="disease-info">
+                <h3>About: {{ predicted_label }}</h3>
+                <p class="desc">{{ disease_description }}</p>
+                <h4>Treatment / Guidance</h4>
+                <p class="treatment">{{ disease_treatment }}</p>
+            </div>
+        {% endif %}
+    </div>
+</body>

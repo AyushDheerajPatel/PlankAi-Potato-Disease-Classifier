@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html>
+<head>
+        <meta charset="utf-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <title>Potato Health AI</title>
+        <link rel="stylesheet" href="{{ url_for('static', filename='fixed_style.css') }}">
+        <link rel="icon" href="{{ url_for('static', filename='favicon.ico') }}" />
+        <style>/* small fallback */
+                .sr-only{position:absolute;left:-10000px}
+        </style>
+</head>
+<body>
+        <div class="page-bg">
+            <div class="card">
+                <header class="card-header">
+                    <h1>Potato Health AI</h1>
+                    <p class="subtitle">Upload a leaf image for instant disease prediction.</p>
+                </header>
+
+                <main class="card-body">
+                    <form method="post" enctype="multipart/form-data" id="upload-form">
+                        <label class="upload-area" for="file-input">
+                            <div class="upload-icon">☁</div>
+                            <div class="upload-text">Drag and drop or click to select file (.png, .jpg, .jpeg)</div>
+                            <input id="file-input" class="sr-only" type="file" name="file" accept=".png,.jpg,.jpeg">
+                        </label>
+
+                        <div class="actions">
+                            <button class="primary-btn" type="submit">Upload and Predict</button>
+                        </div>
+                    </form>
+
+                    {% if message %}
+                        <div class="message-box">{{ message }}</div>
+                    {% endif %}
+
+                    {% if image_path %}
+                        <div class="preview-row">
+                            <div class="preview-image">
+                                <img src="{{ url_for('static', filename=image_path.split('/')[-1]) }}" alt="Uploaded Leaf Image">
+                            </div>
+                        </div>
+
+                        <section class="result-card">
+                            <h3>Diagnosis Result</h3>
+                            <div class="result-grid">
+                                <div class="label">Predicted State:</div>
+                                <div class="value state">{{ predicted_label }}</div>
+
+                                <div class="label">Confidence Score:</div>
+                                <div class="value confidence">{{ confidence }}%</div>
+                            </div>
+                            <p class="muted">*Prediction provided by the MobileNetV2-based CNN model.</p>
+                        </section>
+
+                        <section class="disease-info-card">
+                            <h4>About: {{ predicted_label }}</h4>
+                            <p class="desc">{{ disease_description }}</p>
+                            <h5>Treatment / Guidance</h5>
+                            <p class="treatment">{{ disease_treatment }}</p>
+                        </section>
+                    {% endif %}
+                </main>
+            </div>
+        </div>
+
+        <script>
+            // show selected filename visually (small enhancement)
+            const fileInput = document.getElementById('file-input');
+            const uploadArea = document.querySelector('.upload-area');
+            uploadArea.addEventListener('click', ()=> fileInput.click());
+            fileInput.addEventListener('change', ()=>{
+                const name = fileInput.files[0] ? fileInput.files[0].name : '';
+                if(name) uploadArea.querySelector('.upload-text').textContent = name;
+            });
+        </script>
+</body>
+</html>
