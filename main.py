@@ -25,7 +25,8 @@ try:
     model = tf.keras.models.load_model('potato_model.h5', compile=False)
     logger.info("Model loaded successfully")
 except Exception as e:
-    logger.error(f"Error loading model: {str(e)}")
+    logger.exception("Error loading model")
+    model = None
 
 # Class labels for potato diseases
 class_names = ['Potato___Early_blight', 'Potato___Late_blight', 'Potato___healthy']
@@ -88,6 +89,10 @@ def home():
                     return render_template('fixed_index.html', message='Error processing image')
 
                 # Make prediction
+                if model is None:
+                    logger.error("Prediction requested but model is not loaded")
+                    return render_template('fixed_index.html', message='Model not loaded. Please ensure the model file is present.')
+
                 predictions = model.predict(processed_image)
                 predicted_class = class_names[np.argmax(predictions[0])]
                 confidence = round(float(np.max(predictions[0])) * 100, 2)
