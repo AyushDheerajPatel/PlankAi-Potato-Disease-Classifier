@@ -2,6 +2,6 @@ setuptools
 wheel
 Flask==2.3.2
 gunicorn
-numpy
+numpy<2.0
 Pillow
 tflite-runtime
