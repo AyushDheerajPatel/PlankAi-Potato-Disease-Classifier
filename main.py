@@ -54,7 +54,7 @@ def preprocess_image(img_path):
     """Preprocess the image for model prediction"""
     try:
         img = Image.open(img_path)
-        img = img.resize((255, 255))
+        img = img.resize((224, 224))
         img_array = np.array(img, dtype=np.float32) / 255.0
         img_array = np.expand_dims(img_array, axis=0)
         return img_array
