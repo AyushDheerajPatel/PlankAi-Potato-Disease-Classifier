@@ -20,9 +20,9 @@ os.makedirs('static', exist_ok=True)
 # Load the TFLite model and allocate tensors
 try:
     interpreter = tflite.Interpreter(model_path='potato_model.tflite')
-    interpreter.allocate_tensors()
     input_details = interpreter.get_input_details()
     output_details = interpreter.get_output_details()
+    interpreter.allocate_tensors()
     logger.info("TFLite model loaded successfully")
 except Exception as e:
     logger.exception("Error loading TFLite model")
@@ -54,7 +54,7 @@ def preprocess_image(img_path):
     """Preprocess the image for model prediction"""
     try:
         img = Image.open(img_path)
-        img = img.resize((224, 224))
+        img = img.resize((255, 255))
         img_array = np.array(img, dtype=np.float32) / 255.0
         img_array = np.expand_dims(img_array, axis=0)
         return img_array
@@ -93,7 +93,10 @@ def home():
                     logger.error("Prediction requested but model is not loaded")
                     return render_template('fixed_index.html', message='Model not loaded. Please ensure the model file is present.')
 
-                interpreter.set_tensor(input_details[0]['index'], processed_image)
+                # Pad the input to a batch of 32
+                input_data = np.tile(processed_image, (32, 1, 1, 1))
+
+                interpreter.set_tensor(input_details[0]['index'], input_data)
                 interpreter.invoke()
                 predictions = interpreter.get_tensor(output_details[0]['index'])
                 
