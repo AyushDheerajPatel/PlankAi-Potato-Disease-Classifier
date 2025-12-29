@@ -1,10 +1,7 @@
 setuptools
 wheel
 Flask==2.3.2
-Flask-Cors==4.0.0
 gunicorn
-# Use a TensorFlow release available on newer Python runtimes; Render shows 2.20.0 is available.
-tensorflow==2.20.0
 numpy
 Pillow
-opencv-python-headless
+tflite-runtime

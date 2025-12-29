@@ -1,13 +1,10 @@
-from flask import Flask, render_template, request, flash
+from flask import Flask, render_template, request
 from werkzeug.utils import secure_filename
 import os
-import tensorflow as tf
 import numpy as np
 from PIL import Image
-import cv2
-from tensorflow.keras.preprocessing import image
-from tensorflow.keras.applications.mobilenet_v2 import preprocess_input
 import logging
+import tflite_runtime.interpreter as tflite
 
 # Initialize Flask app
 app = Flask(__name__)
@@ -20,13 +17,16 @@ logger = logging.getLogger(__name__)
 # Create upload folder if it doesn't exist
 os.makedirs('static', exist_ok=True)
 
-# Load the model
+# Load the TFLite model and allocate tensors
 try:
-    model = tf.keras.models.load_model('potato_model.h5', compile=False)
-    logger.info("Model loaded successfully")
+    interpreter = tflite.Interpreter(model_path='potato_model.tflite')
+    interpreter.allocate_tensors()
+    input_details = interpreter.get_input_details()
+    output_details = interpreter.get_output_details()
+    logger.info("TFLite model loaded successfully")
 except Exception as e:
-    logger.exception("Error loading model")
-    model = None
+    logger.exception("Error loading TFLite model")
+    interpreter = None
 
 # Class labels for potato diseases
 class_names = ['Potato___Early_blight', 'Potato___Late_blight', 'Potato___healthy']
@@ -55,7 +55,7 @@ def preprocess_image(img_path):
     try:
         img = Image.open(img_path)
         img = img.resize((255, 255))
-        img_array = np.array(img) / 255.0
+        img_array = np.array(img, dtype=np.float32) / 255.0
         img_array = np.expand_dims(img_array, axis=0)
         return img_array
     except Exception as e:
@@ -89,13 +89,17 @@ def home():
                     return render_template('fixed_index.html', message='Error processing image')
 
                 # Make prediction
-                if model is None:
+                if interpreter is None:
                     logger.error("Prediction requested but model is not loaded")
                     return render_template('fixed_index.html', message='Model not loaded. Please ensure the model file is present.')
 
-                predictions = model.predict(processed_image)
+                interpreter.set_tensor(input_details[0]['index'], processed_image)
+                interpreter.invoke()
+                predictions = interpreter.get_tensor(output_details[0]['index'])
+                
                 predicted_class = class_names[np.argmax(predictions[0])]
                 confidence = round(float(np.max(predictions[0])) * 100, 2)
+                
                 # Fetch description/treatment for the predicted class
                 info = disease_info.get(predicted_class, {})
                 disease_name = info.get('name', predicted_class)
