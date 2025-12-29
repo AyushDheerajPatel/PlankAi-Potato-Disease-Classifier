@@ -1,8 +1,10 @@
-Flask==2.2.5
-gunicorn==20.1.0
+setuptools
+wheel
+Flask==2.3.2
+Flask-Cors==4.0.0
+gunicorn
 # Use a TensorFlow release available on newer Python runtimes; Render shows 2.20.0 is available.
 tensorflow==2.20.0
-numpy==1.24.3
-Pillow==9.5.0
-opencv-python-headless==4.7.0.72
-werkzeug==2.2.3
+numpy
+Pillow
+opencv-python-headless
